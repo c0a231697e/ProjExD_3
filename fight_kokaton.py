@@ -142,8 +142,13 @@ class Bomb:
 
 
 class Explosion:
-
+    """
+    爆発を表示するクラス
+    """
     def __init__(self, center, life=40):
+        """
+        初期値
+        """
         self.image = pg.image.load("fig/explosion.gif")
         self.image_flipped = pg.transform.flip(self.image, True, False)
         self.rect = self.image.get_rect(center=center)
@@ -201,7 +206,6 @@ def main():
                     explosions.append(Explosion(bomb.rct.center)) 
                     break  
 
-  
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         # beam.update(screen)   
