@@ -150,6 +150,7 @@ def main():
     beam = None  # Beam(bird)  # ビームインスタンス生成
     # bomb2 = Bomb((0, 0, 255), 20)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
+    beams = []  # Beamインスタンスを格納するリスト
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -158,7 +159,7 @@ def main():
                 return
             if event.type == pg.KEYDOWN and event.key == pg.K_SPACE:
                 # スペースキー押下でBeamクラスのインスタンス生成
-                beam = Beam(bird)            
+                beams.append(Beam(bird))            
         screen.blit(bg_img, [0, 0])
         
         for bomb in bombs:
@@ -169,18 +170,20 @@ def main():
                 txt = fonto.render("Game Over", True, (255, 0, 0))
                 screen.blit(txt, [WIDTH//2-150, HEIGHT//2])
                 pg.display.update()
-                time.sleep(1)
+                time.sleep(1)   
                 return
-        
-        for i, bomb in enumerate(bombs):
-            if beam is not None:
+            
+        # ビームと爆弾の衝突判定
+        for beam in beams[:]:  # beamsリストをコピーして安全にループ
+            beam.update(screen)
+            for bomb in bombs[:]:  # bombsリストもコピー
                 if beam.rct.colliderect(bomb.rct):
-                    if bomb.rct.colliderect(bomb.rct):
-                        beam = None
-                        bombs[i] = None                
-                        bird.change_img(6, screen)
-                        pg.display.update()
+                    beams.remove(beam)  # ビームを削除
+                    bombs.remove(bomb)  # 爆弾を削除
+                    bird.change_img(6, screen)
+                    break  # 1つの爆弾にしか衝突しないため、ループを抜ける
 
+  
         key_lst = pg.key.get_pressed()
         bird.update(key_lst, screen)
         # beam.update(screen)   
