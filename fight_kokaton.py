@@ -141,6 +141,22 @@ class Bomb:
         screen.blit(self.img, self.rct)
 
 
+class Explosion:
+
+    def __init__(self, center, life=40):
+        self.image = pg.image.load("fig/explosion.gif")
+        self.image_flipped = pg.transform.flip(self.image, True, False)
+        self.rect = self.image.get_rect(center=center)
+        self.life = life
+        self.flip = False
+
+    def update(self, screen):
+        if self.life > 0:
+            screen.blit(self.image_flipped if self.flip else self.image, self.rect)
+            self.flip = not self.flip
+            self.life -= 1
+
+
 def main():
     pg.display.set_caption("たたかえ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))    
@@ -151,6 +167,7 @@ def main():
     # bomb2 = Bomb((0, 0, 255), 20)
     bombs = [Bomb((255, 0, 0), 10) for _ in range(NUM_OF_BOMBS)]
     beams = []  # Beamインスタンスを格納するリスト
+    explosions = []  # 爆発エフェクトのリスト
     clock = pg.time.Clock()
     tmr = 0
     while True:
@@ -174,14 +191,15 @@ def main():
                 return
             
         # ビームと爆弾の衝突判定
-        for beam in beams[:]:  # beamsリストをコピーして安全にループ
+        for beam in beams:
             beam.update(screen)
-            for bomb in bombs[:]:  # bombsリストもコピー
+            for bomb in bombs:  
                 if beam.rct.colliderect(bomb.rct):
-                    beams.remove(beam)  # ビームを削除
-                    bombs.remove(bomb)  # 爆弾を削除
+                    beams.remove(beam)  
+                    bombs.remove(bomb)  
                     bird.change_img(6, screen)
-                    break  # 1つの爆弾にしか衝突しないため、ループを抜ける
+                    explosions.append(Explosion(bomb.rct.center)) 
+                    break  
 
   
         key_lst = pg.key.get_pressed()
@@ -193,6 +211,12 @@ def main():
         if beam is not None:
             beam.update(screen)
         # bomb2.update(screen)
+
+        # 爆発エフェクトの更新
+        explosions = [exp for exp in explosions if exp.life > 0] 
+        for explosion in explosions:
+            explosion.update(screen)
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
